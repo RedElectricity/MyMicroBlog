@@ -1,0 +1,18 @@
+author: "\u8D64\u7535"
+author_description: "\u5C11\u5E74\u5F00\u53D1\u8005"
+author_description_short: "\u6D4B\u8BD5"
+contect:
+  QQ: 12345
+  email: 1234567@qwert.com
+host:
+  full_url: localhost:8000
+  ip: 127.0.0.1
+  port: 8000
+mode:
+  login: true
+password: '123456'
+plugin:
+  chat: true
+theme_colour: blue-grey
+title: "\u8D64\u306E\u4E2A\u4EBA\u5FAE\u578B\u535A\u5BA2"
+token: $2b$12$79IMjvY/ZE6HPcadgBjJquirIcCAqkVVgU97WeDs1U7SCepyCzVm6

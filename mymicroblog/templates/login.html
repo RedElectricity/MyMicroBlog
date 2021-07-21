@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/lib/mdui/css/mdui.min.css') }}">
+    <script src="{{ url_for('static', path='/lib/mdui/js/mdui.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/sw.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/smooth-scroll.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/jquery.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/jquery.pjax.js') }}"></script>
+    <script>smoothScroll.init({speed: 300});</script>
+    <script>
+        if (typeof navigator.serviceWorker !== 'undefined') {
+          navigator.serviceWorker.register("{{ url_for('static', path='/lib/sw.js') }}")
+        }
+    </script>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-primary-{{ theme_colour }} mdui-loaded padding-top">
+    <div class="pjax_loading"></div>
+    <script>
+        $(document).pjax('a[target!=_blank]', '#contentleft', {fragment:'#contentleft', timeout:8000});
+        $(document).on('pjax:send', function() { //pjax链接点击后显示加载动画；
+            $(".pjax_loading").css("display", "block");
+        });
+        $(document).on('pjax:complete', function() { //pjax链接加载完成后隐藏加载动画；
+            $(".pjax_loading").css("display", "none");
+            pajx_loadDuodsuo();
+        });
+        function pajx_loadDuodsuo(){
+            var dus=$(".ds-thread");
+            if($(dus).length==1){
+                var el = document.createElement('div');
+                el.setAttribute('data-thread-key',$(dus).attr("data-thread-key"));//必选参数
+                el.setAttribute('data-url',$(dus).attr("data-url"));
+                DUOSHUO.EmbedThread(el);
+                $(dus).html(el);
+            }
+        }
+    </script>
+    <div class="mdui-appbar mdui-appbar-fixed " mdui-headroom>
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-typo-headline">{{ title }}</a>
+            <div class="mdui-toolbar-spacer"></div>
+            <a href="/" class="mdui-btn mdui-btn-icon mdui-ripple"><i class="mdui-icon material-icons"><i class="mdui-icon material-icons">arrow_back</i></i></a>
+        </div>
+    </div>
+    <div class="mdui-container-fluid">
+        <div class="mdui-center">
+            <div class="mdui-typo">
+                <h2>登录</h2>
+            </div>
+            <form action="/api/login/" enctype="application/x-www-form-urlencoded" method="post">
+                <div class="mdui-textfield mdui-textfield-floating-label">
+                    <label class="mdui-textfield-label">Password</label>
+                    <input class="mdui-textfield-input" type="password" name="password"/>
+                </div>
+                <button type="submit" class="mdui-btn mdui-ripple">登录</button>
+            </form>
+            <div class="mdui-typo mdui-text-center">
+                <h6>MyMicroBlog By RedElectricity Version 0.0.1</h6>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

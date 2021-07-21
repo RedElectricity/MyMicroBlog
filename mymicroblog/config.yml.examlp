@@ -1,0 +1,27 @@
+#站主名称
+author: ""
+#站住长介绍
+author_description: ""
+#站长段介绍
+author_description_short: ""
+#网站密码
+password: ''
+#网站标题
+title: ""
+token: ''
+#网站的主题色
+theme_colour: blue-grey
+contect:
+  QQ: 12345
+  email: "1234567@qwert.com"
+mode:
+  #是否开启登录才能访问mode
+  login: false
+#插件的开关辣
+plugin:
+  chat: true
+#关于伺服器的一些信息辣
+host:
+  ip: 127.0.0.1
+  port: 8000
+  full_url: "localhost:8000"

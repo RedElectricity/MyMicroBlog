@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/lib/mdui/css/mdui.min.css') }}">
+    <script src="{{ url_for('static', path='/lib/mdui/js/mdui.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='/lib/litewebchat.min.css') }}">
+    <script src="{{ url_for('static', path='/lib/smooth-scroll.min.js') }}"></script>
+    <script>smoothScroll.init({speed: 300});</script>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-primary-{{ theme_colour }} mdui-loaded padding-top">
+    <div class="mdui-appbar mdui-appbar-fixed " mdui-headroom>
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-typo-headline">{{ title }}</a>
+            <div class="mdui-toolbar-spacer"></div>
+            <a href="/" class="mdui-btn mdui-btn-icon mdui-ripple"><i class="mdui-icon material-icons"><i class="mdui-icon material-icons">arrow_back</i></i></a>
+        </div>
+    </div>
+    <div class="mdui-container-fluid">
+        <div class="mdui-center">
+            <div class="mdui-typo">
+                <h2>Chat</h2>
+                <h3>您的ID: {{ chat_username }}</h2>
+            </div>
+            <br>
+            <div class="mdui-divider-inset"></div>
+            
+            <div class="lite-chatbox hljs" id="message_box">
+
+            </div>
+
+
+            <form action="" onsubmit="sendMessage(event)">
+                <input type="text" id="messageText" autocomplete="off" class="mdui-textfield-input"/>
+                <button class="mdui-btn">发送</button>
+            </form>
+            <!--<input type="file" id="chat_upload_picture">-->
+            <div>
+                <button class="mdui-btn mdui-ripple" onclick="easyUpload()">添加图片</button>
+                <button class="mdui-btn mdui-ripple" onclick="clean_picture_list()">清理图片列表</button>
+                <p class="mdui-typo-body-1-opacity " id="note-picture-list">目前没有图片</p>
+            </div>
+            <button class="mdui-btn mdui-ripple" mdui-dialog="{target: '#Helper'}">打开使用帮助</button>
+
+            <div class="mdui-dialog" id="Helper">
+            <div class="mdui-dialog-title">使用教程 高级版</div>
+            <div class="mdui-dialog-content">如果想切换身份的话,请删除cookie中的chat_username即可</div>
+            <div class="mdui-dialog-actions">
+                <button class="mdui-btn mdui-ripple" mdui-dialog-close>关闭</button>
+            </div>
+            </div>
+            <script>
+                var picture_list = ''
+                var client_id = '{{ chat_username }}'
+                var ws = new WebSocket(`ws://{{ full_url }}/ws/chat/${client_id}`);
+                document.getElementById('message_box').scrollTo(0,10)
+                //document.getElementById('message_box').scrollTop(10)
+                ws.onmessage = function(event) {
+                    var raw_message = JSON.parse(String(event.data));
+                    if (raw_message['event'] == "join") {
+                        var message_box = document.getElementById('message_box')
+                        var create_event = document.createElement('div')
+                        var content = document.createTextNode(raw_message['message'])
+                        create_event.classList.add("tips")
+                        create_event.appendChild(content)
+                        message_box.appendChild(create_event)
+                    } else if(raw_message['event'] == "leave") {
+                        var message_box = document.getElementById('message_box')
+                        var create_event = document.createElement('div')
+                        var content = document.createTextNode(raw_message['message'])
+                        create_event.classList.add("tips")
+                        create_event.appendChild(content)
+                        message_box.appendChild(create_event)
+                    } else {
+                        var message_box = document.getElementById('message_box')
+                        var message = document.createElement('div')
+                        var username = document.createElement('span')
+                        var content = document.createElement('div')
+                        var message_time = document.createElement('div')
+                        if (raw_message['user'] == '#{{ chat_username }}') {
+                            message.classList.add("cright");
+                        } else {
+                            message.classList.add("cleft");
+                        };
+                        message.classList.add("cmsg")
+                        username.appendChild(document.createTextNode(raw_message['user']))
+                        username.classList.add('name')
+                        content.appendChild(document.createTextNode(raw_message['message']))
+                        content.classList.add('content')
+                        content.classList.add('mdui-typo-body-2')
+                        message_time.classList.add('mdui-typo-caption-opacity')
+                        message.appendChild(username)
+                        if ("picture" in raw_message) {
+                            var message_picture = new Image();
+                            message_picture.src = (raw_message['picture']);
+                            message_picture.classList.add('mdui-img-rounded')
+                            content.appendChild(message_picture);
+                            message_time.appendChild(document.createTextNode(new Date()))
+                        } else {
+                            message_time.appendChild(document.createTextNode(new Date()))
+                        }
+                        content.appendChild(message_time)
+                        message.appendChild(content)
+                        message_box.appendChild(message)
+                    };
+
+                };
+                function sendMessage(event) {
+                    var input = document.getElementById("messageText")
+                    if (input.value.length != 0 | picture_list.length != 0) {
+                        var message = {"message": input.value,"picture": picture_list}
+                        ws.send(JSON.stringify(message))
+                        picture_list = ''
+                        document.getElementById("note-picture-list").textContent = "没有图片在发送列表"
+                    }                    
+                    input.value = ''
+                    event.preventDefault()
+                };
+                function easyUpload(){
+                    var input = document.createElement("input");
+                    input.type = "file";
+                    input.click();
+                    input.onchange = function(){
+                        var file = input.files[0];
+                        var form = new FormData();
+                        form.append("picture", file); 
+                        var xhr = new XMLHttpRequest();
+                        var action = "http://{{ full_url }}/chat/push"; //上传服务的接口地址
+                        xhr.open("POST", action);
+                        xhr.send(form); //发送表单数据
+                        xhr.onreadystatechange = function(){
+                        if(xhr.readyState==4 && xhr.status==200){
+                            var resultObj = JSON.parse(xhr.responseText);
+                            if (resultObj['error'] == "文件损坏") {
+                                mdui.snackbar({
+                                    message: '文件已损坏,请检查文件'
+                                });
+                            } else {
+                                mdui.snackbar({
+                                    message: '上传成功'
+                                });
+                                picture_list = resultObj['file_name']
+                                document.getElementById("note-picture-list").textContent = "有图片在上传列表"
+                            }
+                        }
+                        }
+                    }
+                    }
+                function clean_picture_list() {
+                    picture_list = ''
+                }
+            </script>
+            <div class="mdui-typo mdui-text-center">
+                <h6>MyMicroBlog By RedElectricity Version 0.0.1</h6>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

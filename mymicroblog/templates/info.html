@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/lib/mdui/css/mdui.min.css') }}">
+    <script src="{{ url_for('static', path='/lib/mdui/js/mdui.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/dplayer.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/hls.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='/lib/balloon.min.css') }}">
+    <script src="{{ url_for('static', path='/lib/sw.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/jquery.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/jquery.pjax.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/smooth-scroll.min.js') }}"></script>
+    <script>smoothScroll.init({speed: 300});</script>
+    <script>
+        if (typeof navigator.serviceWorker !== 'undefined') {
+          navigator.serviceWorker.register("{{ url_for('static', path='/lib/sw.js') }}")
+        }
+    </script>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-primary-{{ theme_colour }} mdui-loaded padding-top">
+    <div class="pjax_loading"></div>
+    <script>
+        $(document).pjax('a[target!=_blank]', '#contentleft', {fragment:'#contentleft', timeout:8000});
+        $(document).on('pjax:send', function() { //pjax链接点击后显示加载动画；
+            $(".pjax_loading").css("display", "block");
+        });
+        $(document).on('pjax:complete', function() { //pjax链接加载完成后隐藏加载动画；
+            $(".pjax_loading").css("display", "none");
+            pajx_loadDuodsuo();
+        });
+        function pajx_loadDuodsuo(){
+            var dus=$(".ds-thread");
+            if($(dus).length==1){
+                var el = document.createElement('div');
+                el.setAttribute('data-thread-key',$(dus).attr("data-thread-key"));//必选参数
+                el.setAttribute('data-url',$(dus).attr("data-url"));
+                DUOSHUO.EmbedThread(el);
+                $(dus).html(el);
+            }
+        }
+    </script>
+    <div class="mdui-appbar mdui-appbar-fixed " mdui-headroom>
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-typo-headline">{{ title }}</a>
+            <div class="mdui-toolbar-spacer"></div>
+            <a href="/admin" class="mdui-btn mdui-btn-icon mdui-ripple"><i class="mdui-icon material-icons">dashboard</i></a>
+            <a href="/" class="mdui-btn mdui-btn-icon mdui-ripple"><i class="mdui-icon material-icons"><i class="mdui-icon material-icons">arrow_back</i></i></a>
+        </div>
+    </div>
+    <div class="mdui-container-fluid">
+        <div class="mdui-center">
+            <div class="mdui-typo">
+                <h2>{{ content.content.title }}</h2>
+                <h6>{{ content.content.content }}</h6>
+                <br>
+                <h2>图片</h2>
+            </div>
+            <div class="mdui-row-xs-5 mdui-grid-list">
+                <div class="mdui-col-xs-3">
+                {%- for times in content.content.res.image %}
+                    <div class="mdui-grid-tile">
+                            <img class="mdui-img-rounded mdui-ripple img-zoomable" src="/static/image/{{ times }}" style="zoom:10%;"/>
+                    </div>
+                {% else %}
+                    <p></p>
+                {% endfor %}
+                </div>
+            </div>
+            <br>
+            <div class="mdui-typo">
+                <h2>视频</h2>
+            </div>
+            <!--<div class="mdui-video-container">-->
+                {%- for times in content.content.res.video %}
+                <div id="dplayer" class="mdui-center" ></div>
+                <script>
+                    const dp = new DPlayer({
+                        container: document.getElementById('dplayer'),
+                        screenshot: true,
+                        video: {
+                            url: '/static/video/{{ times }}'
+                        }
+                    });
+                </script>
+                {% else %}
+                <p></p>
+                {% endfor %}
+                <br>
+            <!--</div>-->
+            <div class="mdui-typo">
+                <h2>发送评论</h2>
+            </div>
+            <form action="/comment/{{ content.cid }}" enctype="application/x-www-form-urlencoded" method="post">
+                <div class="mdui-textfield">
+                    <input name="username" class="mdui-textfield-input" type="username" placeholder="称呼"/>
+                    <textarea name="comment_content" class="mdui-textfield-input" rows="4" placeholder="评论" maxlength="200"></textarea>
+                </div>
+                <button type="submit" class="mdui-btn mdui-ripple">提交评论</button>
+            </form>
+            <div class="mdui-typo">
+                <h2>评论区</h2>
+            </div>
+            <ul class="mdui-list">
+                {%- for times in comment %}
+                <li class="mdui-list-item">
+                    <div class="mdui-list-item-content">
+                        <div class="mdui-list-item-title">{{ times.user }}</div>
+                        <div class="mdui-list-item-text">{{ times.content }}</div>
+                    </div>
+                </li>
+                {% else %}
+                <div class="mdui-typo">
+                    <h4>暂无评论</h4>
+                </div>
+                {% endfor %}
+            </ul>
+
+            <div class="mdui-typo mdui-text-center">
+                <h6>MyMicroBlog By RedElectricity Version 0.0.1</h6>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', path='/lib/zooming.min.js') }}"></script>
+    <script>var zooming = new Zooming();zooming.listen('.img-zoomable');</script>
+</body>
+</html>

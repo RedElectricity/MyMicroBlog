@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/lib/mdui/css/mdui.min.css') }}">
+    <script src="{{ url_for('static', path='/lib/mdui/js/mdui.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/smooth-scroll.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/sw.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/jquery.js') }}"></script>
+    <script src="{{ url_for('static', path='/lib/jquery.pjax.js') }}"></script>
+    <script>smoothScroll.init({speed: 300});</script>
+    <script>
+      if (typeof navigator.serviceWorker !== 'undefined') {
+        navigator.serviceWorker.register("{{ url_for('static', path='/lib/sw.js') }}")
+      }
+    </script>
+</head>
+<body class="mdui-appbar-with-toolbar mdui-theme-primary-{{ theme_colour }} mdui-loaded padding-top">
+    <div class="mdui-appbar mdui-appbar-fixed " mdui-headroom>
+        <div class="mdui-toolbar mdui-color-theme">
+            <a href="/" class="mdui-typo-headline">{{ title }}</a>
+            <a href="/chat" class="mdui-typo-title">Chat</a>
+            <div class="mdui-toolbar-spacer"></div>
+            <a href="/" class="mdui-btn mdui-btn-icon mdui-ripple"><i class="mdui-icon material-icons"><i class="mdui-icon material-icons">arrow_back</i></i></a>
+        </div>
+    </div>
+    <div class="mdui-container-fluid">
+        <div class="mdui-center">
+            <div class="mdui-typo">
+                <h2>AdminPanel</h2>
+            </div>
+            <div class="mdui-panel" mdui-panel>
+
+                <div class="mdui-panel-item">
+                  <div class="mdui-panel-item-header">发布贴文</div>
+                  <div class="mdui-panel-item-body">
+                    <form action="/api/push/" enctype="multipart/form-data" method="post">
+                        <div class="mdui-textfield">
+                            <input name="title" class="mdui-textfield-input" type="username" placeholder="标题" required/>
+                            <div class="mdui-textfield-error">请输入标题</div>
+                            <br>
+                            <textarea name="push_content" class="mdui-textfield-input" rows="4" placeholder="内容" required></textarea>
+                            <div class="mdui-textfield-error">请输入内容</div>
+                          </div>
+                        <div class="mdui-typo">
+                            <h4>图片上传区</h4>
+                        </div>
+                        <input type="file" name="picture" multiple>
+                        <div class="mdui-typo">
+                            <h4>视频上传区</h4>
+                        </div>
+                        <input type="file" name="video">
+                        <br>
+                        <br>
+                        <button type="submit" class="mdui-btn mdui-ripple">发布</button>
+                    </form>
+                  </div>
+                </div>
+              
+                <div class="mdui-panel-item">
+                  <div class="mdui-panel-item-header">管理贴文</div>
+                  <div class="mdui-panel-item-body">
+                    <div class="mdui-table-fluid">
+                        <table class="mdui-table mdui-table-hoverable">
+                          <thead>
+                            <tr>
+                              <th>#</th>
+                              <th>贴文标题</th>
+                              <th>查看</th>
+                              <th>删除</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {%- for times in all_content %}
+                            <tr>
+                              <td>{{ times.cid }}</td>
+                              <td>{{ times.content.title }}</td>
+                              <td><a href="/info/{{ times.cid }}"><button class="mdui-btn mdui-ripple">查看</button></a></td>
+                              <td><a href="/api/del_post/{{ times.cid }}"><button class="mdui-btn mdui-ripple">删除</button></a></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td>没有发布贴文</td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mdui-panel-item">
+                  <div class="mdui-panel-item-header">其他功能</div>
+                  <div class="mdui-panel-item-body">
+                    <p>正在制作腻~</p>
+                  </div>
+                </div>
+              
+              </div>
+            <div class="mdui-typo mdui-text-center">
+                <h6>MyMicroBlog By RedElectricity Version 0.0.1</h6>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
